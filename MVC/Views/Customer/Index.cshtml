@@ -1,0 +1,41 @@
+@model IEnumerable<MVC.Models.Customer>
+
+@{
+    ViewData["Title"] = "客戶列表";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4">客戶資料 (MVC 模式)</h2>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>客戶編號</th>
+                            <th>客戶名稱</th>
+                            <th>所在地點</th>
+                            <th>電子郵件</th>
+                            <th>電話</th>
+                            <th>地址</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var customer in Model)
+                        {
+                            <tr>
+                                <td>@customer.CustomerID</td>
+                                <td>@customer.CustomerName</td>
+                                <td>@customer.CustomerLocation</td>
+                                <td>@customer.Email</td>
+                                <td>@customer.Phone</td>
+                                <td>@customer.Address</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

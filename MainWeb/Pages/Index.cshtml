@@ -1,0 +1,38 @@
+@page
+@model MainWeb.Pages.IndexModel
+@{
+    ViewData["Title"] = "首頁";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <h1 class="display-4 mb-4">設計模式示範</h1>
+                    <p class="lead mb-4">這是一個展示 MVC 與 MVVM 模式的示範專案，透過實際的程式碼展示兩種設計模式的差異。</p>
+                    
+                    <div class="mt-5">
+                        <h3 class="h4 mb-4">請選擇要查看的實作方式：</h3>
+                        <div class="d-flex justify-content-center gap-3">
+                            <div class="card bg-light" style="width: 18rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">MVC 模式</h5>
+                                    <p class="card-text">Model-View-Controller 模式的實作範例</p>
+                                    <a href="/mvc/customer" class="btn btn-primary w-100">查看 MVC 實作</a>
+                                </div>
+                            </div>
+                            <div class="card bg-light" style="width: 18rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">MVVM 模式</h5>
+                                    <p class="card-text">Model-View-ViewModel 模式的實作範例</p>
+                                    <a href="/Customers" class="btn btn-success w-100">查看 MVVM 實作</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

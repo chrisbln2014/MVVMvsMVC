@@ -1,0 +1,28 @@
+{
+  "customers": [
+    {
+      "CustomerID": 1,
+      "CustomerName": "王大明",
+      "CustomerLocation": "台北",
+      "Email": "daming.wang@example.com",
+      "Phone": "0912-345-678",
+      "Address": "台北市信義區信義路五段7號"
+    },
+    {
+      "CustomerID": 2,
+      "CustomerName": "李小華",
+      "CustomerLocation": "台中",
+      "Email": "xiaohua.li@example.com",
+      "Phone": "0923-456-789",
+      "Address": "台中市西區臺灣大道二段309號"
+    },
+    {
+      "CustomerID": 3,
+      "CustomerName": "張美麗",
+      "CustomerLocation": "高雄",
+      "Email": "meiling.zhang@example.com",
+      "Phone": "0934-567-890",
+      "Address": "高雄市前金區中正四路211號"
+    }
+  ]
+}
