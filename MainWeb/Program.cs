@@ -41,7 +41,8 @@ app.UseRouting();
 // 啟用授權功能
 app.UseAuthorization();
 
-// 配置 MVC 路由，使用 "mvc" 作為路由前綴
+// 配置 MVC 路由，使用 "mvc" 作為路由前綴, 這邊會讓MVC的專案控制器來控制路由
+// , 而不是MainWeb來控制路由
 // 例如：/mvc/Home/Index 會路由到 HomeController 的 Index 方法
 // {controller=Home} 代表如果 URL 沒有指定控制器，預設使用 HomeController
 // {action=Index} 代表如果 URL 沒有指定動作，預設使用 Index 方法
@@ -50,7 +51,7 @@ app.MapControllerRoute(
     name: "mvc",
     pattern: "mvc/{controller=Home}/{action=Index}/{id?}");
 
-// 設定使用 Razor Pages 的路由規則
+// 設定使用MainWeb的 Razor Pages 的路由規則
 // 這會將請求映射到 Pages 資料夾中的對應頁面
 app.MapRazorPages();
 

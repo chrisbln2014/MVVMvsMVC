@@ -1,16 +1,22 @@
 @page
 @model MVVM.Pages.CustomersModel
+
 @{
     ViewData["Title"] = "客戶列表";
 }
 
+@* 主要內容區塊 *@
 <div class="container py-4">
+    @* 使用 Bootstrap 卡片元件來包裝表格 *@
     <div class="card shadow-sm">
         <div class="card-body">
+            @* 標題說明這是 MVVM 模式的實現 *@
             <h2 class="card-title mb-4">客戶資料 (MVVM 模式)</h2>
 
+            @* 使用 Bootstrap 的響應式表格 *@
             <div class="table-responsive">
                 <table class="table table-hover">
+                    @* 表格標題列 *@
                     <thead class="table-light">
                         <tr>
                             <th>客戶編號</th>
@@ -21,10 +27,14 @@
                             <th>地址</th>
                         </tr>
                     </thead>
+                    @* 表格內容區 *@
                     <tbody>
+                        @* 使用 foreach 迴圈顯示客戶資料 *@
+                        @* Model.Customers 來自 ViewModel，展示了 MVVM 的資料流 *@
                         @foreach (var customer in Model.CustomerVM.Customers)
                         {
                             <tr>
+                                @* 使用 @ 符號存取 C# 物件的屬性 *@
                                 <td>@customer.CustomerID</td>
                                 <td>@customer.CustomerName</td>
                                 <td>@customer.CustomerLocation</td>

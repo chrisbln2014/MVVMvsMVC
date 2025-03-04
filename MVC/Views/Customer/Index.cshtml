@@ -1,16 +1,21 @@
 @model IEnumerable<MVC.Models.Customer>
 
 @{
-    ViewData["Title"] = "客戶列表";
+    ViewData["Title"] = "客戶列表"; @* 設定頁面標題 *@
 }
 
+@* 主要內容區塊 *@
 <div class="container py-4">
+    @* 使用 Bootstrap 卡片元件來包裝表格 *@
     <div class="card shadow-sm">
         <div class="card-body">
+            @* 標題說明這是 MVC 模式的實現 *@
             <h2 class="card-title mb-4">客戶資料 (MVC 模式)</h2>
 
+            @* 使用 Bootstrap 的響應式表格 *@
             <div class="table-responsive">
                 <table class="table table-hover">
+                    @* 表格標題列 *@
                     <thead class="table-light">
                         <tr>
                             <th>客戶編號</th>
@@ -21,10 +26,14 @@
                             <th>地址</th>
                         </tr>
                     </thead>
+                    @* 表格內容區 *@
                     <tbody>
+                        @* 使用 foreach 迴圈顯示客戶資料 *@
+                        @* 在 MVC 中直接使用 Model，資料由控制器傳入 *@
                         @foreach (var customer in Model)
                         {
                             <tr>
+                                @* 使用 @ 符號存取 C# 物件的屬性 *@
                                 <td>@customer.CustomerID</td>
                                 <td>@customer.CustomerName</td>
                                 <td>@customer.CustomerLocation</td>
