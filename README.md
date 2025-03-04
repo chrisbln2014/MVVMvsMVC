@@ -67,7 +67,7 @@ MVVMvsMVC/
 │   └── Pages/             # Razor Pages
 │
 └── MVC/                   # MVC 專案
-│   ├── Properties/        # 專案配置
+    ├── Properties/        # 專案配置
     ├── Models/            # 資料模型
     ├── Views/             # 視圖
     └── Controllers/       # 控制器
@@ -154,7 +154,7 @@ MVVMvsMVC/
 
 ## 如何運行專案
 
-### 使用 Visual Studio
+### 使用 Visual Studio/Visual Studio Code
 1. 開啟 MVVMvsMVC.sln 解決方案檔
 2. 將 MainWeb 設為啟動專案
 3. 按下 F5 或點擊「啟動」按鈕
