@@ -1,4 +1,5 @@
-// 建立 Web 應用程式建構器，這是所有 ASP.NET Core 應用程式的起點
+// 這是主要入口網站的程式進入點
+// 負責配置和啟動整個應用程式
 var builder = WebApplication.CreateBuilder(args);
 
 // 添加 MVC (Model-View-Controller) 服務
@@ -8,9 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // - Controller（控制器）：協調模型和視圖之間的互動
 builder.Services.AddControllersWithViews();
 
-// 添加 Razor Pages 服務，用於 MVVM (Model-View-ViewModel) 架構
-// Razor Pages 是一種更簡單的頁面導向模式，更接近 MVVM 架構
-// 每個頁面都有自己的模型和處理邏輯
+// 加入 Razor Pages 服務
+// MainWeb 使用 Razor Pages 作為首頁介面
 builder.Services.AddRazorPages();
 
 // 使用上述配置建立應用程式實例
@@ -22,7 +22,12 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
+    // 啟用 HTTPS 重定向
+    app.UseHsts();
 }
+
+// 將 HTTP 請求重定向到 HTTPS
+app.UseHttpsRedirection();
 
 // 啟用靜態檔案服務
 // 這使應用程式能夠提供靜態檔案如 HTML、CSS、JavaScript、圖片等
@@ -33,6 +38,9 @@ app.UseStaticFiles();
 // 路由決定了如何根據 URL 將請求導向到正確的處理程序
 app.UseRouting();
 
+// 啟用授權功能
+app.UseAuthorization();
+
 // 配置 MVC 路由，使用 "mvc" 作為路由前綴
 // 例如：/mvc/Home/Index 會路由到 HomeController 的 Index 方法
 // {controller=Home} 代表如果 URL 沒有指定控制器，預設使用 HomeController
@@ -42,10 +50,8 @@ app.MapControllerRoute(
     name: "mvc",
     pattern: "mvc/{controller=Home}/{action=Index}/{id?}");
 
-// 配置 Razor Pages (MVVM) 路由
-// Razor Pages 的路由是自動根據檔案結構映射的
-// 例如：/Contact 會映射到 Pages/Contact.cshtml
-// 例如：/Customers/Details 會映射到 Pages/Customers/Details.cshtml
+// 設定使用 Razor Pages 的路由規則
+// 這會將請求映射到 Pages 資料夾中的對應頁面
 app.MapRazorPages();
 
 // 當沒有匹配的路由時，預設回到 Index 頁面

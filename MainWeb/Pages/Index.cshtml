@@ -1,36 +1,56 @@
 @page
 @model MainWeb.Pages.IndexModel
 @{
-    ViewData["Title"] = "首頁";
+    ViewData["Title"] = "架構比較首頁";
 }
 
-<div class="container py-5">
+<div class="text-center">
+    <h1 class="display-4 mb-4">ASP.NET Core 架構比較專案</h1>
+    
     <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <div class="card shadow-lg">
-                <div class="card-body p-5">
-                    <h1 class="display-4 mb-4">設計模式示範</h1>
-                    <p class="lead mb-4">這是一個展示 MVC 與 MVVM 模式的示範專案，透過實際的程式碼展示兩種設計模式的差異。</p>
-                    
-                    <div class="mt-5">
-                        <h3 class="h4 mb-4">請選擇要查看的實作方式：</h3>
-                        <div class="d-flex justify-content-center gap-3">
-                            <div class="card bg-light" style="width: 18rem;">
-                                <div class="card-body">
-                                    <h5 class="card-title">MVC 模式</h5>
-                                    <p class="card-text">Model-View-Controller 模式的實作範例</p>
-                                    <a href="/mvc/customer" class="btn btn-primary w-100">查看 MVC 實作</a>
-                                </div>
-                            </div>
-                            <div class="card bg-light" style="width: 18rem;">
-                                <div class="card-body">
-                                    <h5 class="card-title">MVVM 模式</h5>
-                                    <p class="card-text">Model-View-ViewModel 模式的實作範例</p>
-                                    <a href="/Customers" class="btn btn-success w-100">查看 MVVM 實作</a>
-                                </div>
-                            </div>
-                        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>兩種實現方式</h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <!-- MVVM 模式連結 -->
+                        <a href="https://localhost:5001/Customers" class="btn btn-primary btn-lg">
+                            查看 MVVM 實現
+                            <small class="d-block">使用 Razor Pages</small>
+                        </a>
+
+                        <!-- MVC 模式連結 -->
+                        <a href="https://localhost:5002/Customer" class="btn btn-success btn-lg">
+                            查看 MVC 實現
+                            <small class="d-block">使用 ASP.NET Core MVC</small>
+                        </a>
                     </div>
+                </div>
+            </div>
+
+            <!-- 架構說明 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>比較說明</h2>
+                </div>
+                <div class="card-body text-start">
+                    <h5>MVVM (Razor Pages)</h5>
+                    <ul class="mb-4">
+                        <li>使用 Razor Pages 實現</li>
+                        <li>Pages 和 PageModel 緊密結合</li>
+                        <li>使用 ViewModel 處理資料邏輯</li>
+                        <li>適合表單導向的應用</li>
+                    </ul>
+
+                    <h5>MVC (ASP.NET Core MVC)</h5>
+                    <ul>
+                        <li>使用傳統 MVC 架構</li>
+                        <li>控制器處理請求和回應</li>
+                        <li>視圖和模型分離</li>
+                        <li>適合複雜的網路應用</li>
+                    </ul>
                 </div>
             </div>
         </div>
