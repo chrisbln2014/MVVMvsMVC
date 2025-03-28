@@ -1,15 +1,36 @@
 # MainWeb 輸出檔案 (所有 bin/Debug/net8.0 內的檔案皆忽略)
-MainWeb/bin/Debug/net8.0/*
+MainWeb/bin/**
 
 # MainWeb 物件檔 (obj 目錄下所有檔案)
 MainWeb/obj/**
 
 # MVC 輸出檔案
-MVC/bin/Debug/net8.0/*
+MVC/bin/**
 # MVC 物件檔
 MVC/obj/**
 
 # MVVM 輸出檔案
-MVVM/bin/Debug/net8.0/*
+MVVM/bin/**
 # MVVM 物件檔
 MVVM/obj/**
+
+# Blazor-Server 輸出檔案
+Blazor-Server/bin/**
+Blazor-Server/obj/**
+
+# Blazor-WebAssembly 輸出檔案
+Blazor-WebAssembly/bin/**
+Blazor-WebAssembly/obj/**
+
+# 動態生成的靜態資源
+wwwroot/css/**
+wwwroot/lib/**
+
+# 開發環境設定檔案
+**/launchSettings.json
+
+# NuGet 暫存檔案
+**/project.assets.json
+**/project.nuget.cache
+**/*.nuget.g.props
+**/*.nuget.g.targets
