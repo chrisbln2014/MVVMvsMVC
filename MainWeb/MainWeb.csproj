@@ -9,6 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\MVC\MVC.csproj" />
     <ProjectReference Include="..\MVVM\MVVM.csproj" />
+    <ProjectReference Include="..\Blazor-Server\Blazor-Server.csproj" />
+    <ProjectReference Include="..\Blazor-WebAssembly\Blazor-WebAssembly.csproj" />
   </ItemGroup>
 
 </Project>

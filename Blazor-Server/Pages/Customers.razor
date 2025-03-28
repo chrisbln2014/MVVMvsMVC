@@ -1,0 +1,49 @@
+@page "/customers"
+@using Blazor_Server.Data
+@inject CustomerService CustomerService
+
+<h1>客戶資料</h1>
+
+<p>這個頁面顯示從customers.json讀取的客戶列表。</p>
+
+@if (customers == null)
+{
+    <p><em>載入中...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>客戶編號</th>
+                <th>客戶名稱</th>
+                <th>所在地</th>
+                <th>電子郵件</th>
+                <th>電話</th>
+                <th>地址</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var customer in customers)
+            {
+                <tr>
+                    <td>@customer.CustomerID</td>
+                    <td>@customer.CustomerName</td>
+                    <td>@customer.CustomerLocation</td>
+                    <td>@customer.Email</td>
+                    <td>@customer.Phone</td>
+                    <td>@customer.Address</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Customer>? customers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await CustomerService.GetCustomersAsync();
+    }
+}

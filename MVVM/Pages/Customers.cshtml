@@ -7,6 +7,11 @@
 
 @* 主要內容區塊 *@
 <div class="container py-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mb-4">@TempData["SuccessMessage"]</div>
+    }
+
     @* 使用 Bootstrap 卡片元件來包裝表格 *@
     <div class="card shadow-sm">
         <div class="card-body">
@@ -25,22 +30,31 @@
                             <th>電子郵件</th>
                             <th>電話</th>
                             <th>地址</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     @* 表格內容區 *@
                     <tbody>
-                        @* 使用 foreach 迴圈顯示客戶資料 *@
-                        @* Model.Customers 來自 ViewModel，展示了 MVVM 的資料流 *@
+                        @* MVVM模式特點: 使用ViewModel作為中間層 *@
+                        @* 在MVVM中，View透過ViewModel獲取資料，而非直接從Model獲取 *@
+                        @* Model.CustomerVM是ViewModel的實例，它封裝了資料邏輯和處理，提供給View使用 *@
+                        @* 透過這種方式，若資料需要更新時，只需更新ViewModel，View會自動重新綁定並更新UI *@
                         @foreach (var customer in Model.CustomerVM.Customers)
                         {
                             <tr>
                                 @* 使用 @ 符號存取 C# 物件的屬性 *@
+                                @* 在MVVM中，這些資料綁定可以是雙向的，使UI能反映資料變更，資料也能反映UI變更 *@
                                 <td>@customer.CustomerID</td>
                                 <td>@customer.CustomerName</td>
                                 <td>@customer.CustomerLocation</td>
                                 <td>@customer.Email</td>
                                 <td>@customer.Phone</td>
                                 <td>@customer.Address</td>
+                                <td>
+                                    @* 編輯按鈕導向編輯頁面 *@
+                                    <a asp-page="./CustomerEdit" asp-route-id="@customer.CustomerID" 
+                                       class="btn btn-primary btn-sm">編輯</a>
+                                </td>
                             </tr>
                         }
                     </tbody>

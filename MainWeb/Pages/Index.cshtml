@@ -9,7 +9,7 @@
         <h1 class="display-5">ASP.NET Core 架構比較</h1>
     </header>
     
-    <!-- 兩種模式卡片 -->
+    <!-- 架構卡片 -->
     <div class="row g-4 justify-content-center mb-4">
         <!-- MVVM 卡片 -->
         <div class="col-md-5">
@@ -52,14 +52,56 @@
                 </div>
             </div>
         </div>
+
+        <!-- Blazor Server 卡片 -->
+        <div class="col-md-5">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h2 class="fs-5 mb-0">Blazor Server</h2>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">服務器端 Blazor 應用程式</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">✓ 即時互動性</li>
+                        <li class="list-group-item">✓ SignalR 即時通訊</li>
+                    </ul>
+                    <div class="mt-auto">
+                        <a href="/blazor-server/customers" class="btn btn-info w-100">
+                            查看 Blazor Server
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blazor WebAssembly 卡片 -->
+        <div class="col-md-5">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning">
+                    <h2 class="fs-5 mb-0">Blazor WebAssembly</h2>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">客戶端 Blazor 應用程式</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">✓ 瀏覽器端執行</li>
+                        <li class="list-group-item">✓ 離線支援</li>
+                    </ul>
+                    <div class="mt-auto">
+                        <a href="/blazor-wasm" class="btn btn-warning w-100">
+                            查看 Blazor WebAssembly
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 簡明比較表 -->
+    <!-- 架構比較表 -->
     <div class="row">
         <div class="col-md-10 mx-auto">
             <div class="card shadow-sm">
                 <div class="card-header bg-light">
-                    <h2 class="fs-5 mb-0">兩種架構比較</h2>
+                    <h2 class="fs-5 mb-0">架構比較</h2>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -69,6 +111,8 @@
                                     <th>特性</th>
                                     <th>MVVM (Razor Pages)</th>
                                     <th>MVC</th>
+                                    <th>Blazor Server</th>
+                                    <th>Blazor WebAssembly</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,11 +120,22 @@
                                     <td>架構焦點</td>
                                     <td>頁面導向</td>
                                     <td>控制器導向</td>
+                                    <td>元件導向</td>
+                                    <td>元件導向</td>
                                 </tr>
                                 <tr>
                                     <td>適合場景</td>
                                     <td>表單應用、簡單網站</td>
                                     <td>複雜應用、API 開發</td>
+                                    <td>即時應用、需要低延遲</td>
+                                    <td>離線應用、SPA</td>
+                                </tr>
+                                <tr>
+                                    <td>執行位置</td>
+                                    <td>服務器端</td>
+                                    <td>服務器端</td>
+                                    <td>服務器端</td>
+                                    <td>瀏覽器端</td>
                                 </tr>
                             </tbody>
                         </table>

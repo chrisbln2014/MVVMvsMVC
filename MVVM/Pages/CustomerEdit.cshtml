@@ -1,0 +1,81 @@
+@page "{id:int}"
+@model MVVM.Pages.CustomerEditModel
+
+@{
+    ViewData["Title"] = "編輯客戶資料";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4">編輯客戶資料 (MVVM 模式)</h2>
+            
+            @* MVVM 特性示範：錯誤訊息由 ViewModel 提供，透過資料繫結顯示 *@
+            @if (!string.IsNullOrEmpty(Model.CustomerVM.ErrorMessage))
+            {
+                <div class="alert alert-danger mb-4">@Model.CustomerVM.ErrorMessage</div>
+            }
+
+            @* MVVM 特性示範：表單與 ViewModel 進行雙向繫結 *@
+            @* 注意這裡使用 asp-for 建立繫結到 ViewModel 屬性 *@
+            <form method="post">
+                <input type="hidden" asp-for="CustomerVM.CustomerToEdit.CustomerID" />
+                
+                <div class="mb-3">
+                    <label asp-for="CustomerVM.CustomerToEdit.CustomerName" class="form-label">客戶名稱</label>
+                    @* MVVM 雙向繫結特性：當輸入改變時，自動更新 ViewModel 中的值，並觸發驗證 *@
+                    <input asp-for="CustomerVM.CustomerToEdit.CustomerName" class="form-control" 
+                           onchange="notifyViewModelChanged()" />
+                    <span asp-validation-for="CustomerVM.CustomerToEdit.CustomerName" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="CustomerVM.CustomerToEdit.CustomerLocation" class="form-label">所在地點</label>
+                    <input asp-for="CustomerVM.CustomerToEdit.CustomerLocation" class="form-control" 
+                           onchange="notifyViewModelChanged()" />
+                    <span asp-validation-for="CustomerVM.CustomerToEdit.CustomerLocation" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="CustomerVM.CustomerToEdit.Email" class="form-label">電子郵件</label>
+                    <input asp-for="CustomerVM.CustomerToEdit.Email" class="form-control" 
+                           onchange="notifyViewModelChanged()" />
+                    <span asp-validation-for="CustomerVM.CustomerToEdit.Email" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="CustomerVM.CustomerToEdit.Phone" class="form-label">電話</label>
+                    <input asp-for="CustomerVM.CustomerToEdit.Phone" class="form-control" 
+                           onchange="notifyViewModelChanged()" />
+                    <span asp-validation-for="CustomerVM.CustomerToEdit.Phone" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="CustomerVM.CustomerToEdit.Address" class="form-label">地址</label>
+                    <textarea asp-for="CustomerVM.CustomerToEdit.Address" class="form-control" rows="3" 
+                              onchange="notifyViewModelChanged()"></textarea>
+                    <span asp-validation-for="CustomerVM.CustomerToEdit.Address" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-page="./Customers" class="btn btn-secondary">返回列表</a>
+                    <button type="submit" class="btn btn-primary">儲存變更</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // MVVM 特性示範：即時通知 ViewModel 資料已變更
+        function notifyViewModelChanged() {
+            // 在實際應用中，可以用 SignalR 或其他方式實時通知後端 ViewModel
+            console.log("資料已更新，通知 ViewModel");
+            // 這裡簡單示意，實際 MVVM 框架會自動處理這個過程
+            document.getElementById('changed-indicator').style.display = 'block';
+        }
+    </script>
+}

@@ -1,0 +1,73 @@
+@model MVC.Models.Customer
+
+@{
+    ViewData["Title"] = "編輯客戶";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4">編輯客戶資料 (MVC 模式)</h2>
+            
+            @* MVC 特點：顯示錯誤訊息，由 Controller 的 ModelState 提供 *@
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger mb-4">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                </div>
+            }
+
+            @* MVC 特點：表單提交到 Controller 的 Edit 方法 *@
+            @* View 只負責顯示，所有資料處理都在 Controller 中完成 *@
+            <form asp-action="Edit" method="post">
+                @* 隱藏欄位，確保 ID 被傳回 *@
+                <input type="hidden" asp-for="CustomerID" />
+                
+                @* 表單元素對應 Model 的屬性 *@
+                <div class="mb-3">
+                    <label asp-for="CustomerName" class="form-label">客戶名稱</label>
+                    @* MVC 特點：使用 asp-for 指定對應的 Model 屬性 *@
+                    @* 但無法即時更新 Model，必須等表單提交到 Controller 才會更新 *@
+                    <input asp-for="CustomerName" class="form-control" />
+                    <span asp-validation-for="CustomerName" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="CustomerLocation" class="form-label">所在地點</label>
+                    @* MVC 特點：任何資料變更都必須經過 Controller 處理 *@
+                    @* 不像 MVVM 能夠雙向繫結自動更新 ViewModel *@
+                    <input asp-for="CustomerLocation" class="form-control" />
+                    <span asp-validation-for="CustomerLocation" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">電子郵件</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Phone" class="form-label">電話</label>
+                    <input asp-for="Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label">地址</label>
+                    <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+                    @* MVC 特點：點擊按鈕後，表單內容被提交至 Controller，由 Controller 處理更新邏輯 *@
+                    <button type="submit" class="btn btn-primary">儲存變更</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

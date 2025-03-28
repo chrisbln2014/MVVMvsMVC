@@ -6,6 +6,12 @@
 
 @* 主要內容區塊 *@
 <div class="container py-4">
+    @* 顯示成功訊息 *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mb-4">@TempData["SuccessMessage"]</div>
+    }
+
     @* 使用 Bootstrap 卡片元件來包裝表格 *@
     <div class="card shadow-sm">
         <div class="card-body">
@@ -24,22 +30,33 @@
                             <th>電子郵件</th>
                             <th>電話</th>
                             <th>地址</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     @* 表格內容區 *@
                     <tbody>
-                        @* 使用 foreach 迴圈顯示客戶資料 *@
-                        @* 在 MVC 中直接使用 Model，資料由控制器傳入 *@
+                        @* MVC模式特點: 直接從Controller傳遞Model到View *@
+                        @* 在MVC中，Controller負責處理用戶請求、取得資料，然後選擇適當的View並傳遞Model *@
+                        @* 這裡的Model直接是Customer的集合，沒有中間層的ViewModel進行資料轉換或封裝 *@
+                        @* 若資料需要更新，通常需要重新載入整個頁面或部分重新整理，沒有自動雙向綁定機制 *@
                         @foreach (var customer in Model)
                         {
                             <tr>
                                 @* 使用 @ 符號存取 C# 物件的屬性 *@
+                                @* 在MVC中，這是單向的資料呈現，View只負責展示資料，不會處理資料邏輯或業務規則 *@
+                                @* 所有的資料處理都發生在Controller中，View僅作為顯示層存在 *@
                                 <td>@customer.CustomerID</td>
                                 <td>@customer.CustomerName</td>
                                 <td>@customer.CustomerLocation</td>
                                 <td>@customer.Email</td>
                                 <td>@customer.Phone</td>
                                 <td>@customer.Address</td>
+                                <td>
+                                    @* MVC特點：透過URL+路由連接到Controller的方法 *@
+                                    @* 這裡的編輯按鈕指向CustomerController的Edit方法 *@
+                                    <a asp-action="Edit" asp-route-id="@customer.CustomerID" 
+                                       class="btn btn-primary btn-sm">編輯</a>
+                                </td>
                             </tr>
                         }
                     </tbody>

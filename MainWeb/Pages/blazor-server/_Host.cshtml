@@ -1,0 +1,51 @@
+@page "/blazor-server"
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blazor Server</title>
+    <base href="/blazor-server/" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="/_content/Blazor-Server/css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="app">
+        @(await Html.RenderComponentAsync<Blazor_Server.App>(RenderMode.Server))
+        <div class="loading">Loading...</div>
+    </div>
+
+    <div id="blazor-error-ui" style="display:none;">
+        <environment include="Staging,Production">
+            發生錯誤。此應用程式可能不再回應，除非重新載入。
+        </environment>
+        <environment include="Development">
+            發生未處理的例外狀況。請參閱瀏覽器開發工具以取得詳細資訊。
+        </environment>
+        <a href="" class="reload">重新載入</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="/_framework/blazor.server.js" autostart="false"></script>
+    <script>
+        Blazor.start({
+            logLevel: 1, // 詳細記錄用於調試
+            applicationCulture: 'zh-TW',
+            configureSignalR: function (builder) {
+                builder.withUrl('_blazor');
+            }
+        }).then(() => {
+            console.log('Blazor 啟動完成');
+            document.querySelector('.loading').style.display = 'none';
+        }).catch(error => {
+            console.error('Blazor 啟動失敗:', error);
+        });
+    </script>
+</body>
+</html>

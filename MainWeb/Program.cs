@@ -1,63 +1,95 @@
-// 這是主要入口網站的程式進入點
-// 負責配置和啟動整個應用程式
+using Blazor_Server.Data;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// 添加 MVC (Model-View-Controller) 服務
-// MVC 是一種將應用程式分為三個主要組件的設計模式：
-// - Model（模型）：處理資料和業務邏輯
-// - View（視圖）：負責使用者介面
-// - Controller（控制器）：協調模型和視圖之間的互動
+// 添加核心服務
 builder.Services.AddControllersWithViews();
-
-// 加入 Razor Pages 服務
-// MainWeb 使用 Razor Pages 作為首頁介面
 builder.Services.AddRazorPages();
 
-// 使用上述配置建立應用程式實例
+// 添加 Blazor Server 服務，不使用不支援的 PathBase 選項
+builder.Services.AddServerSideBlazor();
+
+// 添加客戶服務
+builder.Services.AddScoped<CustomerService>();
+
+// 添加 HttpClient 服務以便在需要時使用
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
-// 環境判斷：如果不是開發環境（例如是生產環境）
-// 則將所有未處理的異常導向到 /Error 頁面
-// 在開發環境中，會顯示更詳細的錯誤信息，有助於除錯
+// 環境配置
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // 啟用 HTTPS 重定向
     app.UseHsts();
 }
 
-// 將 HTTP 請求重定向到 HTTPS
 app.UseHttpsRedirection();
 
-// 啟用靜態檔案服務
-// 這使應用程式能夠提供靜態檔案如 HTML、CSS、JavaScript、圖片等
-// 這些檔案通常存放在 wwwroot 資料夾中
+// 設置基本靜態檔案服務
 app.UseStaticFiles();
 
-// 啟用路由功能
-// 路由決定了如何根據 URL 將請求導向到正確的處理程序
-app.UseRouting();
+// 添加對 Data 目錄的訪問，允許直接訪問 json 檔案
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "..", "Data")),
+    RequestPath = "/data"
+});
 
-// 啟用授權功能
+// 確保 Blazor 相關資源正確載入
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "..", "Blazor-Server", "wwwroot")),
+    RequestPath = "/_content/Blazor-Server"
+});
+
+// 【新增】確保 Blazor WebAssembly 相關資源正確載入
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "..", "Blazor-WebAssembly", "wwwroot")),
+    RequestPath = "/_content/Blazor-WebAssembly"
+});
+
+// 【新增】配置 Blazor WebAssembly 的 _framework 目錄，這是 Blazor WebAssembly 應用運行必須的
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "..", "Blazor-WebAssembly", "bin", "Debug", "net8.0", "wwwroot")),
+    RequestPath = "/blazor-wasm"
+});
+
+app.UseRouting();
 app.UseAuthorization();
 
-// 配置 MVC 路由，使用 "mvc" 作為路由前綴, 這邊會讓MVC的專案控制器來控制路由
-// , 而不是MainWeb來控制路由
-// 例如：/mvc/Home/Index 會路由到 HomeController 的 Index 方法
-// {controller=Home} 代表如果 URL 沒有指定控制器，預設使用 HomeController
-// {action=Index} 代表如果 URL 沒有指定動作，預設使用 Index 方法
-// {id?} 表示 id 參數是可選的
+// 使用頂層路由註冊，替代 UseEndpoints
+
+// 1. 設定 MVC 控制器路由
 app.MapControllerRoute(
     name: "mvc",
     pattern: "mvc/{controller=Home}/{action=Index}/{id?}");
+    
+// 2. 配置 Blazor Hub (SignalR 連接點)
+app.MapBlazorHub("/blazor-server/_blazor");
 
-// 設定使用MainWeb的 Razor Pages 的路由規則
-// 這會將請求映射到 Pages 資料夾中的對應頁面
+// 3. 配置 Razor Pages
 app.MapRazorPages();
 
-// 當沒有匹配的路由時，預設回到 Index 頁面
-// 這確保用戶不會看到 404 錯誤頁面，而是被重定向到首頁
-app.MapFallbackToPage("/Index");
+// 4. 配置首頁路由
+app.MapGet("/", context => {
+    context.Response.Redirect("/Index");
+    return System.Threading.Tasks.Task.CompletedTask;
+});
 
-// 啟動應用程式，開始監聽和處理 HTTP 請求
+// 5. Blazor Server 應用的路由
+app.MapFallbackToPage("/blazor-server/{**path}", "/blazor-server/_Host");
+
+// 6. Blazor WebAssembly 應用的路由
+app.MapFallbackToPage("/blazor-wasm/{**path}", "/blazor-wasm/_Host");
+
 app.Run();

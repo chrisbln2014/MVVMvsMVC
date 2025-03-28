@@ -1,12 +1,12 @@
-{
-  "customers": [
+﻿{
+  "Customers": [
     {
       "CustomerID": 1,
       "CustomerName": "王大明",
       "CustomerLocation": "台北",
       "Email": "daming.wang@example.com",
       "Phone": "0912-345-678",
-      "Address": "台北市信義區信義路五段7號"
+      "Address": "台北市信義區信義路五段7號8樓之1"
     },
     {
       "CustomerID": 2,

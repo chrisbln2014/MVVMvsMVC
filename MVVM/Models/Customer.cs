@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.IO;
 
 namespace MVVM.Models
 {
@@ -22,6 +24,12 @@ namespace MVVM.Models
         
         // 靜態快取，用於儲存所有客戶資料
         private static List<Customer>? _allCustomers;
+        
+        // 使用相對路徑定義JSON檔案路徑
+        private static readonly string jsonFilePath = Path.Combine(
+            Directory.GetParent(AppContext.BaseDirectory)?.Parent?.Parent?.Parent?.Parent?.FullName ?? "",
+            "Data", 
+            "customers.json");
 
         // 靜態方法：獲取所有客戶資料
         public static List<Customer> GetAllCustomers()
@@ -29,49 +37,112 @@ namespace MVVM.Models
             // 如果快取中沒有資料，則從 JSON 檔案讀取
             if (_allCustomers == null)
             {
-                try
-                {
-                    // 指定 JSON 檔案的完整路徑
-                    string jsonFilePath = @"C:\Users\1418\Documents\projects\MVVMvsMVC\Data\customers.json";
-
-                    Console.WriteLine($"JSON 文件路徑: {jsonFilePath}");
-
-                    // 檢查檔案是否存在
-                    if (File.Exists(jsonFilePath))
-                    {
-                        Console.WriteLine("找到 JSON 文件，開始讀取...");
-                        // 使用 UTF8 編碼讀取檔案內容
-                        string jsonString = File.ReadAllText(jsonFilePath, Encoding.UTF8);
-                        Console.WriteLine($"JSON 內容: {jsonString}");
-
-                        // 設定 JSON 反序列化選項
-                        var options = new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true // 設定屬性名稱不區分大小寫
-                        };
-
-                        // 將 JSON 字串轉換為 C# 物件
-                        var data = JsonSerializer.Deserialize<CustomerData>(jsonString, options);
-                        _allCustomers = data?.Customers ?? new List<Customer>();
-                        Console.WriteLine($"成功讀取到 {_allCustomers.Count} 個客戶資料");
-                    }
-                    else
-                    {
-                        _allCustomers = new List<Customer>();
-                        Console.WriteLine($"檔案不存在: {jsonFilePath}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // 錯誤處理：記錄錯誤訊息並返回空列表
-                    Console.WriteLine($"讀取資料時發生錯誤: {ex.Message}");
-                    Console.WriteLine($"錯誤詳情: {ex}");
-                    _allCustomers = new List<Customer>();
-                }
+                LoadCustomersFromJson();
             }
             return _allCustomers ?? new List<Customer>();
         }
+
+        // 靜態方法：從JSON讀取客戶資料
+        private static void LoadCustomersFromJson()
+        {
+            try
+            {
+                Console.WriteLine($"JSON 文件路徑: {jsonFilePath}");
+
+                // 檢查檔案是否存在
+                if (File.Exists(jsonFilePath))
+                {
+                    Console.WriteLine("找到 JSON 文件，開始讀取...");
+                    // 使用 UTF8 編碼讀取檔案內容
+                    string jsonString = File.ReadAllText(jsonFilePath, Encoding.UTF8);
+                    Console.WriteLine($"JSON 內容: {jsonString}");
+
+                    // 設定 JSON 反序列化選項
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true // 設定屬性名稱不區分大小寫
+                    };
+
+                    // 將 JSON 字串轉換為 C# 物件
+                    var data = JsonSerializer.Deserialize<CustomerData>(jsonString, options);
+                    _allCustomers = data?.Customers ?? new List<Customer>();
+                    Console.WriteLine($"成功讀取到 {_allCustomers.Count} 個客戶資料");
+                }
+                else
+                {
+                    _allCustomers = new List<Customer>();
+                    Console.WriteLine($"檔案不存在: {jsonFilePath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // 錯誤處理：記錄錯誤訊息並返回空列表
+                Console.WriteLine($"讀取資料時發生錯誤: {ex.Message}");
+                Console.WriteLine($"錯誤詳情: {ex}");
+                _allCustomers = new List<Customer>();
+            }
+        }
+
+        // 取得指定ID的客戶
+        public static Customer? GetCustomerById(int id)
+        {
+            var customers = GetAllCustomers();
+            return customers.FirstOrDefault(c => c.CustomerID == id);
+        }
+
+        // 更新客戶資料
+        public static bool UpdateCustomer(Customer updatedCustomer)
+        {
+            try
+            {
+                var customers = GetAllCustomers();
+                var existingCustomer = customers.FirstOrDefault(c => c.CustomerID == updatedCustomer.CustomerID);
+                
+                if (existingCustomer == null)
+                {
+                    return false;
+                }
+                
+                // 更新客戶資料
+                existingCustomer.CustomerName = updatedCustomer.CustomerName;
+                existingCustomer.CustomerLocation = updatedCustomer.CustomerLocation;
+                existingCustomer.Email = updatedCustomer.Email;
+                existingCustomer.Phone = updatedCustomer.Phone;
+                existingCustomer.Address = updatedCustomer.Address;
+                
+                // 保存到文件
+                SaveCustomersToJson();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"更新客戶資料時發生錯誤: {ex.Message}");
+                return false;
+            }
+        }
+
+        // 保存客戶資料到JSON檔案
+        private static bool SaveCustomersToJson()
+        {
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true, // 使JSON格式化輸出，便於閱讀
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping // 避免將中文轉為Unicode編碼
+                };
+                
+                var data = new CustomerData { Customers = _allCustomers ?? new List<Customer>() };
+                string jsonString = JsonSerializer.Serialize(data, options);
+                File.WriteAllText(jsonFilePath, jsonString, Encoding.UTF8);
+                Console.WriteLine("成功保存客戶資料到JSON檔案");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"保存客戶資料時發生錯誤: {ex.Message}");
+                return false;
+            }
+        }
     }
-
-
 }
