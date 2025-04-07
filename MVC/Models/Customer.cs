@@ -130,6 +130,68 @@ namespace MVC.Models
             }
         }
         
+        // 新增客戶
+        public static bool AddCustomer(Customer newCustomer)
+        {
+            try
+            {
+                var customers = GetAllCustomers();
+                
+                // 如果集合為空，設置ID為1，否則設置為最大ID+1
+                if (customers.Count == 0)
+                {
+                    newCustomer.CustomerID = 1;
+                }
+                else
+                {
+                    newCustomer.CustomerID = customers.Max(c => c.CustomerID) + 1;
+                }
+                
+                // 添加到客戶列表
+                customers.Add(newCustomer);
+                _allCustomers = customers;
+                
+                // 保存到JSON檔案
+                SaveCustomersToJson();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"新增客戶時發生錯誤: {ex.Message}");
+                return false;
+            }
+        }
+        
+        // 刪除客戶
+        public static bool DeleteCustomer(int id)
+        {
+            try
+            {
+                var customers = GetAllCustomers();
+                var customer = customers.FirstOrDefault(c => c.CustomerID == id);
+                
+                if (customer == null)
+                {
+                    Console.WriteLine($"找不到ID為 {id} 的客戶");
+                    return false;
+                }
+                
+                // 從列表中移除
+                customers.Remove(customer);
+                _allCustomers = customers;
+                
+                // 保存到JSON檔案
+                SaveCustomersToJson();
+                Console.WriteLine($"已成功刪除ID為 {id} 的客戶");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"刪除客戶時發生錯誤: {ex.Message}");
+                return false;
+            }
+        }
+        
         // 保存客戶資料到JSON檔案
         private static bool SaveCustomersToJson()
         {

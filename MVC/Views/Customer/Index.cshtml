@@ -1,7 +1,7 @@
 @model IEnumerable<MVC.Models.Customer>
 
 @{
-    ViewData["Title"] = "客戶列表"; @* 設定頁面標題 *@
+    ViewData["Title"] = "客戶列表";
 }
 
 @* 主要內容區塊 *@
@@ -11,12 +11,23 @@
     {
         <div class="alert alert-success mb-4">@TempData["SuccessMessage"]</div>
     }
+    
+    @* 顯示錯誤訊息 *@
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mb-4">@TempData["ErrorMessage"]</div>
+    }
 
     @* 使用 Bootstrap 卡片元件來包裝表格 *@
     <div class="card shadow-sm">
         <div class="card-body">
             @* 標題說明這是 MVC 模式的實現 *@
-            <h2 class="card-title mb-4">客戶資料 (MVC 模式)</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="card-title mb-0">客戶資料 (MVC 模式)</h2>
+                <button type="button" class="btn btn-success" onclick="showAddCustomerModal()">
+                    <i class="bi bi-plus-circle me-1"></i>新增客戶
+                </button>
+            </div>
 
             @* 使用 Bootstrap 的響應式表格 *@
             <div class="table-responsive">
@@ -35,16 +46,9 @@
                     </thead>
                     @* 表格內容區 *@
                     <tbody>
-                        @* MVC模式特點: 直接從Controller傳遞Model到View *@
-                        @* 在MVC中，Controller負責處理用戶請求、取得資料，然後選擇適當的View並傳遞Model *@
-                        @* 這裡的Model直接是Customer的集合，沒有中間層的ViewModel進行資料轉換或封裝 *@
-                        @* 若資料需要更新，通常需要重新載入整個頁面或部分重新整理，沒有自動雙向綁定機制 *@
                         @foreach (var customer in Model)
                         {
                             <tr>
-                                @* 使用 @ 符號存取 C# 物件的屬性 *@
-                                @* 在MVC中，這是單向的資料呈現，View只負責展示資料，不會處理資料邏輯或業務規則 *@
-                                @* 所有的資料處理都發生在Controller中，View僅作為顯示層存在 *@
                                 <td>@customer.CustomerID</td>
                                 <td>@customer.CustomerName</td>
                                 <td>@customer.CustomerLocation</td>
@@ -52,10 +56,17 @@
                                 <td>@customer.Phone</td>
                                 <td>@customer.Address</td>
                                 <td>
-                                    @* MVC特點：透過URL+路由連接到Controller的方法 *@
-                                    @* 這裡的編輯按鈕指向CustomerController的Edit方法 *@
-                                    <a asp-action="Edit" asp-route-id="@customer.CustomerID" 
-                                       class="btn btn-primary btn-sm">編輯</a>
+                                    <div class="btn-group" role="group">
+                                        @* 編輯按鈕 *@
+                                        <a asp-action="Edit" asp-route-id="@customer.CustomerID" 
+                                           class="btn btn-primary btn-sm">編輯</a>
+                                        
+                                        @* 刪除按鈕（使用JavaScript確認） *@
+                                        <button type="button" class="btn btn-danger btn-sm" 
+                                                onclick="confirmDelete('@customer.CustomerID', '@customer.CustomerName')">
+                                            刪除
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -65,3 +76,94 @@
         </div>
     </div>
 </div>
+
+@* 新增客戶模態視窗 *@
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addCustomerModalLabel">新增客戶</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Create" method="post" id="addCustomerForm">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="CustomerName" class="form-label">客戶名稱</label>
+                            <input type="text" class="form-control" id="CustomerName" name="CustomerName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="CustomerLocation" class="form-label">所在地點</label>
+                            <input type="text" class="form-control" id="CustomerLocation" name="CustomerLocation" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="Email" class="form-label">電子郵件</label>
+                            <input type="email" class="form-control" id="Email" name="Email">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="Phone" class="form-label">電話</label>
+                            <input type="tel" class="form-control" id="Phone" name="Phone">
+                        </div>
+                        <div class="col-12">
+                            <label for="Address" class="form-label">地址</label>
+                            <input type="text" class="form-control" id="Address" name="Address">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-success">新增客戶</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* 刪除確認對話框 *@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">確認刪除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                您確定要刪除客戶「<span id="customerName"></span>」嗎？
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" asp-action="Delete" method="post">
+                    <input type="hidden" id="customerId" name="id" />
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-danger">刪除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 刪除確認函數
+        function confirmDelete(id, name) {
+            document.getElementById('customerId').value = id;
+            document.getElementById('customerName').textContent = name;
+            
+            // 使用 Bootstrap 5 的方式顯示對話框
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+        
+        // 顯示新增客戶模態視窗
+        function showAddCustomerModal() {
+            var modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
+            modal.show();
+        }
+        
+        // 在表單提交後關閉模態視窗
+        document.getElementById('addCustomerForm').addEventListener('submit', function(event) {
+            // 提交後表單會自然刷新頁面，模態視窗會消失
+            // 如果需要使用Ajax提交，則需要在此處處理
+        });
+    </script>
+}

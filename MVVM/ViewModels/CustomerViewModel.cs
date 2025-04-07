@@ -56,6 +56,24 @@ namespace MVVM.ViewModels
             }
         }
 
+        // 新增的客戶資料物件，初始化時設定必要屬性的默認值
+        private Customer _newCustomer = new Customer
+        {
+            CustomerID = 0, // 暫時設為0，實際新增時會由 AddCustomer 方法設定正確的ID
+            CustomerName = string.Empty,
+            CustomerLocation = string.Empty
+        };
+        
+        public Customer NewCustomer
+        {
+            get => _newCustomer;
+            set
+            {
+                _newCustomer = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         // 是否有未儲存的變更
         private bool _hasChanges;
         public bool HasChanges
@@ -80,6 +98,18 @@ namespace MVVM.ViewModels
             }
         }
 
+        // 成功訊息
+        private string? _successMessage;
+        public string? SuccessMessage
+        {
+            get => _successMessage;
+            set
+            {
+                _successMessage = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         // 建構函式：當創建 ViewModel 實例時執行
         public CustomerViewModel()
         {
@@ -88,6 +118,9 @@ namespace MVVM.ViewModels
                 // 從 Model 層獲取客戶資料
                 Customers = Customer.GetAllCustomers();
                 Console.WriteLine($"CustomerViewModel 成功載入了 {Customers.Count} 個客戶資料");
+                
+                // 初始化新客戶物件
+                ResetNewCustomer();
             }
             catch (Exception ex)
             {
@@ -149,6 +182,89 @@ namespace MVVM.ViewModels
                 ErrorMessage = $"保存資料時發生錯誤: {ex.Message}";
                 return false;
             }
+        }
+
+        // 新增客戶
+        public bool AddCustomer()
+        {
+            ErrorMessage = null;
+            SuccessMessage = null;
+            
+            try
+            {
+                // 調用 Model 層的方法新增客戶
+                bool result = Customer.AddCustomer(NewCustomer);
+                if (result)
+                {
+                    // 更新客戶列表
+                    var updatedCustomers = Customer.GetAllCustomers();
+                    Customers = updatedCustomers;
+                    NotifyPropertyChanged(nameof(Customers));
+                    
+                    // 設置成功消息
+                    SuccessMessage = "客戶已成功新增";
+                    
+                    // 重設新客戶表單
+                    ResetNewCustomer();
+                    
+                    return true;
+                }
+                else
+                {
+                    ErrorMessage = "無法新增客戶";
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"新增客戶時發生錯誤: {ex.Message}";
+                return false;
+            }
+        }
+        
+        // 刪除客戶
+        public bool DeleteCustomer(int id)
+        {
+            ErrorMessage = null;
+            SuccessMessage = null;
+            
+            try
+            {
+                // 調用 Model 層的方法刪除客戶
+                bool result = Customer.DeleteCustomer(id);
+                if (result)
+                {
+                    // 更新客戶列表
+                    var updatedCustomers = Customer.GetAllCustomers();
+                    Customers = updatedCustomers;
+                    NotifyPropertyChanged(nameof(Customers));
+                    
+                    // 設置成功消息
+                    SuccessMessage = "客戶已成功刪除";
+                    return true;
+                }
+                else
+                {
+                    ErrorMessage = "無法刪除客戶，可能找不到指定的客戶";
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"刪除客戶時發生錯誤: {ex.Message}";
+                return false;
+            }
+        }
+        
+        // 重設新客戶表單
+        public void ResetNewCustomer()
+        {
+            NewCustomer = new Customer
+            {
+                CustomerID = 0, // 暫時設為0，實際新增時會由 AddCustomer 方法設定正確的ID
+                CustomerName = string.Empty,
+                CustomerLocation = string.Empty
+            };
         }
 
         // 當資料變更時呼叫此方法，通知View更新UI

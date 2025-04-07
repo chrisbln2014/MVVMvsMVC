@@ -73,5 +73,81 @@ namespace MVC.Controllers
             // 如果验证失败，返回帶有错误信息的表单视图
             return View(customer);
         }
+        
+        // GET: Customer/Create
+        // 顯示創建新客戶的表單
+        public IActionResult Create()
+        {
+            return View();
+        }
+        
+        // POST: Customer/Create
+        // 處理創建新客戶的表單提交
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create([Bind("CustomerName,CustomerLocation,Email,Phone,Address")] Customer customer)
+        {
+            // 驗證模型狀態
+            if (ModelState.IsValid)
+            {
+                // 添加新客戶
+                bool result = CustomerService.AddCustomer(customer);
+                
+                if (result)
+                {
+                    // 設置成功消息
+                    TempData["SuccessMessage"] = "客戶已成功創建";
+                    // 重定向到客戶列表頁面
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    // 添加錯誤消息
+                    ModelState.AddModelError("", "創建客戶失敗");
+                }
+            }
+            
+            // 如果驗證失敗，返回表單視圖
+            return View(customer);
+        }
+        
+        // GET: Customer/Delete/5
+        // 顯示刪除確認頁面
+        public IActionResult Delete(int id)
+        {
+            // 獲取要刪除的客戶
+            var customer = CustomerService.GetCustomerById(id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+            
+            // 返回刪除確認視圖
+            return View(customer);
+        }
+        
+        // POST: Customer/Delete/5
+        // 處理刪除確認
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            // 執行刪除操作
+            bool result = CustomerService.DeleteCustomer(id);
+            
+            if (result)
+            {
+                // 設置成功消息
+                TempData["SuccessMessage"] = "客戶已成功刪除";
+            }
+            else
+            {
+                // 設置錯誤消息
+                TempData["ErrorMessage"] = "刪除客戶失敗";
+            }
+            
+            // 重定向到客戶列表頁面
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
