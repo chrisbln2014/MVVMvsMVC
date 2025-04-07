@@ -5,7 +5,9 @@
 
 <h1>客戶資料</h1>
 
-<p>這個頁面顯示從customers.json讀取的客戶列表。</p>
+<p>這個頁面顯示從customers.json讀取的客戶列表，並支援編輯、新增和刪除功能。</p>
+
+<button class="btn btn-primary mb-3" @onclick="AddNewCustomer">新增客戶</button>
 
 @if (customers == null)
 {
@@ -22,6 +24,7 @@ else
                 <th>電子郵件</th>
                 <th>電話</th>
                 <th>地址</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -34,17 +37,123 @@ else
                     <td>@customer.Email</td>
                     <td>@customer.Phone</td>
                     <td>@customer.Address</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="() => EditCustomer(customer)">編輯</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteCustomer(customer.CustomerID)">刪除</button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 }
 
+@if (showCustomerModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitle</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="customerName" class="form-label">客戶名稱</label>
+                        <input type="text" class="form-control" id="customerName" @bind="currentCustomer.CustomerName" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerLocation" class="form-label">所在地</label>
+                        <input type="text" class="form-control" id="customerLocation" @bind="currentCustomer.CustomerLocation" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerEmail" class="form-label">電子郵件</label>
+                        <input type="email" class="form-control" id="customerEmail" @bind="currentCustomer.Email" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerPhone" class="form-label">電話</label>
+                        <input type="tel" class="form-control" id="customerPhone" @bind="currentCustomer.Phone" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerAddress" class="form-label">地址</label>
+                        <textarea class="form-control" id="customerAddress" @bind="currentCustomer.Address"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">取消</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveCustomer">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Customer>? customers;
+    private Customer currentCustomer = new Customer();
+    private bool showCustomerModal = false;
+    private bool isNewCustomer = false;
+    private string modalTitle = "";
 
     protected override async Task OnInitializedAsync()
     {
+        await RefreshCustomers();
+    }
+
+    private async Task RefreshCustomers()
+    {
         customers = await CustomerService.GetCustomersAsync();
+    }
+
+    private void AddNewCustomer()
+    {
+        currentCustomer = new Customer();
+        isNewCustomer = true;
+        showCustomerModal = true;
+        modalTitle = "新增客戶";
+    }
+
+    private void EditCustomer(Customer customer)
+    {
+        // 創建一個新的Customer對象避免直接修改原始數據
+        currentCustomer = new Customer
+        {
+            CustomerID = customer.CustomerID,
+            CustomerName = customer.CustomerName,
+            CustomerLocation = customer.CustomerLocation,
+            Email = customer.Email,
+            Phone = customer.Phone,
+            Address = customer.Address
+        };
+        isNewCustomer = false;
+        showCustomerModal = true;
+        modalTitle = "編輯客戶";
+    }
+
+    private async Task SaveCustomer()
+    {
+        if (isNewCustomer)
+        {
+            await CustomerService.AddCustomerAsync(currentCustomer);
+        }
+        else
+        {
+            await CustomerService.UpdateCustomerAsync(currentCustomer);
+        }
+
+        CloseModal();
+        await RefreshCustomers();
+    }
+
+    private async Task DeleteCustomer(int id)
+    {
+        if (await CustomerService.DeleteCustomerAsync(id))
+        {
+            await RefreshCustomers();
+        }
+    }
+
+    private void CloseModal()
+    {
+        showCustomerModal = false;
     }
 }

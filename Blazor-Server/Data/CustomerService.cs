@@ -5,13 +5,19 @@ using System.Net.Http;
 
 namespace Blazor_Server.Data
 {
-    // 客戶資料服務類別，提供從JSON讀取客戶資料的功能
+    // 客戶資料服務類別，提供從JSON讀取客戶資料的功能，並新增編輯、新增、刪除的功能
     public class CustomerService
     {
         private readonly ILogger<CustomerService> _logger;
         private readonly IWebHostEnvironment _environment;
         private readonly IHttpClientFactory? _httpClientFactory;
         private static List<Customer>? _allCustomers;
+
+        // JSON檔案路徑
+        private string JsonFilePath => Path.Combine(
+            Directory.GetParent(_environment.ContentRootPath)?.FullName ?? "",
+            "Data",
+            "customers.json");
 
         // 使用依賴注入取得必要服務
         public CustomerService(
@@ -47,10 +53,7 @@ namespace Blazor_Server.Data
             try
             {
                 // 嘗試讀取 JSON 檔案的絕對路徑
-                string jsonFilePath = Path.Combine(
-                    Directory.GetParent(_environment.ContentRootPath)?.FullName ?? "",
-                    "Data",
-                    "customers.json");
+                string jsonFilePath = JsonFilePath;
 
                 _logger.LogInformation($"嘗試讀取 JSON 檔案: {jsonFilePath}");
 
@@ -136,6 +139,136 @@ namespace Blazor_Server.Data
         {
             var customers = await GetCustomersAsync();
             return customers.FirstOrDefault(c => c.CustomerID == id);
+        }
+        
+        // 添加新客戶
+        public async Task<bool> AddCustomerAsync(Customer customer)
+        {
+            try
+            {
+                var customers = await GetCustomersAsync();
+                
+                // 如果集合為空，設置ID為1，否則設置為最大ID+1
+                if (customers.Count == 0)
+                {
+                    customer.CustomerID = 1;
+                }
+                else
+                {
+                    customer.CustomerID = customers.Max(c => c.CustomerID) + 1;
+                }
+                
+                customers.Add(customer);
+                _allCustomers = customers;
+                
+                // 保存到JSON文件
+                await SaveCustomersToJsonAsync();
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "添加客戶時發生錯誤");
+                return false;
+            }
+        }
+        
+        // 更新客戶資料
+        public async Task<bool> UpdateCustomerAsync(Customer customer)
+        {
+            try
+            {
+                var customers = await GetCustomersAsync();
+                var existingCustomer = customers.FirstOrDefault(c => c.CustomerID == customer.CustomerID);
+                
+                if (existingCustomer == null)
+                {
+                    _logger.LogWarning($"未找到ID為 {customer.CustomerID} 的客戶");
+                    return false;
+                }
+                
+                // 更新客戶資料
+                existingCustomer.CustomerName = customer.CustomerName;
+                existingCustomer.CustomerLocation = customer.CustomerLocation;
+                existingCustomer.Email = customer.Email;
+                existingCustomer.Phone = customer.Phone;
+                existingCustomer.Address = customer.Address;
+                
+                // 保存到JSON文件
+                await SaveCustomersToJsonAsync();
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"更新ID為 {customer.CustomerID} 的客戶時發生錯誤");
+                return false;
+            }
+        }
+        
+        // 刪除客戶
+        public async Task<bool> DeleteCustomerAsync(int id)
+        {
+            try
+            {
+                var customers = await GetCustomersAsync();
+                var customer = customers.FirstOrDefault(c => c.CustomerID == id);
+                
+                if (customer == null)
+                {
+                    _logger.LogWarning($"未找到ID為 {id} 的客戶");
+                    return false;
+                }
+                
+                customers.Remove(customer);
+                _allCustomers = customers;
+                
+                // 保存到JSON文件
+                await SaveCustomersToJsonAsync();
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"刪除ID為 {id} 的客戶時發生錯誤");
+                return false;
+            }
+        }
+        
+        // 保存客戶資料到JSON文件
+        private async Task SaveCustomersToJsonAsync()
+        {
+            try
+            {
+                if (_allCustomers == null)
+                {
+                    _logger.LogWarning("嘗試保存空的客戶列表");
+                    return;
+                }
+                
+                // 準備序列化選項
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                
+                // 將客戶數據包裝進容器類
+                var data = new CustomerData { Customers = _allCustomers };
+                
+                // 序列化為JSON
+                string jsonString = JsonSerializer.Serialize(data, options);
+                
+                // 保存到文件
+                await File.WriteAllTextAsync(JsonFilePath, jsonString, Encoding.UTF8);
+                
+                _logger.LogInformation($"客戶資料已保存到 {JsonFilePath}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "保存客戶資料時發生錯誤");
+                throw;
+            }
         }
     }
 }
