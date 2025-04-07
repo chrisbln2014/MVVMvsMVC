@@ -27,15 +27,30 @@ namespace Blazor_WebAssembly.Services
 
             try
             {
-                // 從根目錄的Data文件夾讀取customers.json
-                // 在WebAssembly中，我們將JSON文件放在wwwroot/sample-data目錄下
-                var data = await _httpClient.GetFromJsonAsync<CustomerData>("sample-data/customers.json");
-                _cachedCustomers = data?.Customers ?? new List<Customer>();
+                // 從 MainWeb 應用提供的數據 API 獲取客戶資料
+                // 注意：這裡使用相對路徑，因為 Blazor WebAssembly 已經被託管在 MainWeb 項目中
+                var data = await _httpClient.GetFromJsonAsync<CustomerData>("/data/customers.json");
+                
+                if (data?.Customers != null)
+                {
+                    Console.WriteLine($"成功獲取到 {data.Customers.Count} 筆客戶資料");
+                    _cachedCustomers = data.Customers;
+                }
+                else
+                {
+                    Console.WriteLine("獲取到的客戶資料為空");
+                    _cachedCustomers = new List<Customer>();
+                }
+                
                 return _cachedCustomers;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"獲取客戶資料時出錯: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"內部錯誤: {ex.InnerException.Message}");
+                }
                 return new List<Customer>();
             }
         }

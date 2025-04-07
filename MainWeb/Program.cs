@@ -48,26 +48,43 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/_content/Blazor-Server"
 });
 
-// 【新增】確保 Blazor WebAssembly 相關資源正確載入
+// Blazor WebAssembly 的靜態資源配置
+// 重要：使用新的 StaticFileOptions 配置，禁用資源完整性檢查
+var webAssemblyWwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "..", "Blazor-WebAssembly", "bin", "Debug", "net8.0", "wwwroot");
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(webAssemblyWwwrootPath),
+    RequestPath = "/blazor-wasm",
+    OnPrepareResponse = ctx =>
+    {
+        // 停用快取，確保始終獲取最新資源
+        ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
+        ctx.Context.Response.Headers.Append("Expires", "-1");
+        
+        // 移除任何內容安全策略標頭，它可能會阻止某些資源載入
+        if (ctx.Context.Response.Headers.ContainsKey("Content-Security-Policy"))
+        {
+            ctx.Context.Response.Headers.Remove("Content-Security-Policy");
+        }
+    }
+});
+
+// 將常規的 Blazor-WebAssembly/wwwroot 內容映射為靜態檔案
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
         Path.Combine(builder.Environment.ContentRootPath, "..", "Blazor-WebAssembly", "wwwroot")),
-    RequestPath = "/_content/Blazor-WebAssembly"
+    RequestPath = "/blazor-wasm-content"
 });
 
-// 【新增】配置 Blazor WebAssembly 的 _framework 目錄，這是 Blazor WebAssembly 應用運行必須的
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "..", "Blazor-WebAssembly", "bin", "Debug", "net8.0", "wwwroot")),
-    RequestPath = "/blazor-wasm"
-});
+// 打印關鍵路徑以便確認配置
+Console.WriteLine($"WebAssembly 編譯輸出路徑: {webAssemblyWwwrootPath}");
+Console.WriteLine($"_framework 目錄是否存在: {Directory.Exists(Path.Combine(webAssemblyWwwrootPath, "_framework"))}");
 
 app.UseRouting();
 app.UseAuthorization();
 
-// 使用頂層路由註冊，替代 UseEndpoints
+// 使用頂層路由註冊
 
 // 1. 設定 MVC 控制器路由
 app.MapControllerRoute(

@@ -1,4 +1,4 @@
-@page "/blazor-wasm"
+@page "/blazor-wasm/{*path:nonfile}"
 @{
     Layout = null;
 }
@@ -12,8 +12,50 @@
     <base href="/blazor-wasm/" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-    <link href="/_content/Blazor-WebAssembly/css/app.css" rel="stylesheet" />
-    <link href="Blazor-WebAssembly.styles.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    
+    <!-- 確保這個樣式表路徑正確或移除它，如果不存在 -->
+    @* <link href="Blazor-WebAssembly.styles.css" rel="stylesheet" /> *@
+    
+    <!-- 移除自動啟動屬性，以便我們可以設定自定義載入行為 -->
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    
+    <!-- 添加詳細的錯誤捕獲和記錄 -->
+    <script>
+        // 安全地更新元素文本的輔助函數
+        function safeSetElementText(selector, text) {
+            var element = document.querySelector(selector);
+            if (element) {
+                element.innerHTML = text;
+            } else {
+                // 應用已啟動後就不需要再顯示此警告
+                if (!window.appStarted) {
+                    console.warn(`元素不存在: ${selector}`);
+                }
+            }
+        }
+        
+        // 全局錯誤處理
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('全局錯誤捕獲:', {
+                message: message,
+                source: source,
+                lineno: lineno,
+                colno: colno,
+                error: error
+            });
+            safeSetElementText('.loading-progress-text', 
+                `發生錯誤: ${message}<br>位置: ${source}:${lineno}:${colno}`);
+            return false;
+        };
+        
+        // 未處理的 Promise 錯誤
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('未處理的 Promise 拒絕:', event.reason);
+            safeSetElementText('.loading-progress-text', 
+                `未處理的 Promise 錯誤: ${event.reason}`);
+        });
+    </script>
 </head>
 <body>
     <div id="app">
@@ -29,7 +71,124 @@
         <a href="" class="reload">重新載入</a>
         <a class="dismiss">🗙</a>
     </div>
-
-    <script src="_framework/blazor.webassembly.js"></script>
+    
+    <script>
+        // 應用程式啟動狀態追蹤
+        window.appStarted = false;
+        
+        // 詳細記錄啟動過程
+        console.log(`[${new Date().toISOString()}] 初始化 Blazor WebAssembly...`);
+        
+        // 添加詳細階段記錄
+        var startTime = performance.now();
+        var stages = {};
+        
+        function logStage(stageName) {
+            var now = performance.now();
+            var elapsed = now - startTime;
+            stages[stageName] = elapsed;
+            console.log(`[${new Date().toISOString()}] 階段: ${stageName}, 耗時: ${elapsed.toFixed(2)}ms`);
+            
+            // 只在應用尚未啟動時嘗試更新載入文本
+            if (!window.appStarted) {
+                safeSetElementText('.loading-progress-text', `載入中: ${stageName}...`);
+            }
+        }
+        
+        // 確保 DOM 完全載入後再操作元素
+        document.addEventListener('DOMContentLoaded', function() {
+            logStage('頁面初始化');
+            
+            // 檢查所需的 DOM 元素是否存在
+            if (!document.querySelector('.loading-progress-text')) {
+                console.error('缺少必要的 DOM 元素: .loading-progress-text');
+                // 嘗試創建元素
+                var textEl = document.createElement('div');
+                textEl.className = 'loading-progress-text';
+                document.querySelector('#app')?.appendChild(textEl);
+            }
+            
+            // 修改載入資源的方法以記錄更多詳情
+            try {
+                logStage('開始載入 Blazor');
+                
+                Blazor.start({
+                    loadBootResource: function (type, name, defaultUri, integrity) {
+                        logStage(`載入資源: ${type}/${name}`);
+                        
+                        // 記錄資源詳細信息
+                        console.log({
+                            resourceType: type,
+                            resourceName: name,
+                            uri: defaultUri,
+                            hasIntegrity: !!integrity
+                        });
+                        
+                        // 通過直接返回一個 fetch 請求來略過內建的完整性驗證
+                        if (type !== 'dotnetjs') {
+                            console.log(`使用自定義請求載入: ${name}`);
+                            return fetch(defaultUri, {
+                                cache: 'no-cache',
+                                integrity: '',  // 清空完整性屬性
+                                credentials: 'same-origin',
+                                headers: {
+                                    'Pragma': 'no-cache',
+                                    'Cache-Control': 'no-cache'
+                                }
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    console.error(`資源 ${name} 載入失敗:`, response.status, response.statusText);
+                                    throw new Error(`資源載入失敗: ${response.status} ${response.statusText}`);
+                                }
+                                logStage(`資源 ${name} 載入成功`);
+                                return response;
+                            })
+                            .catch(error => {
+                                console.error(`資源 ${name} 載入出錯:`, error);
+                                throw error;
+                            });
+                        }
+                        
+                        // 對於 dotnetjs 類型的資源，使用預設的 URI
+                        return defaultUri;
+                    }
+                }).then(function () {
+                    // 標記應用已啟動，不再需要載入指示器
+                    window.appStarted = true;
+                    
+                    logStage('Blazor WebAssembly 初始化完成');
+                    console.log(`[${new Date().toISOString()}] Blazor WebAssembly 啟動成功!`);
+                    console.table(stages);
+                    
+                    // 應用程式啟動後的自我診斷
+                    console.log('應用程式狀態檢查:');
+                    console.log('- Blazor 實例存在:', !!window.Blazor);
+                    
+                    // 安全地檢查 DOM 元素
+                    var appElement = document.querySelector('#app');
+                    console.log('- 應用程式元素存在:', !!appElement);
+                    if (appElement) {
+                        console.log('- 應用程式元素內容:', appElement.innerHTML);
+                    }
+                }).catch(function (error) {
+                    logStage('Blazor WebAssembly 初始化失敗');
+                    console.error(`[${new Date().toISOString()}] Blazor WebAssembly 啟動失敗:`, error);
+                    console.error('詳細錯誤:', error.toString());
+                    console.error('錯誤堆疊:', error.stack);
+                    console.table(stages);
+                    
+                    // 在頁面上安全地顯示錯誤訊息
+                    safeSetElementText('.loading-progress-text', 
+                        `載入失敗：${error.message || '未知錯誤'}<br>
+                        請檢查控制台以獲取更多信息。<br>
+                        <small>${error.stack ? error.stack.split('\n')[0] : ''}</small>`);
+                });
+            } catch (ex) {
+                console.error('啟動 Blazor 時發生嚴重錯誤:', ex);
+                safeSetElementText('.loading-progress-text', `嚴重錯誤：${ex.message}`);
+            }
+        });
+    </script>
 </body>
 </html>
