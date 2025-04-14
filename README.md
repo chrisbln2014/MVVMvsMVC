@@ -1,6 +1,43 @@
 # MVVMvsMVC - ASP.NET Core 架構比較專案
 
+**版本：1.0.0**
+**最後更新：2025年4月14日**
+
 這個專案旨在展示和比較 ASP.NET Core 中 MVVM（Model-View-ViewModel）和 MVC（Model-View-Controller）兩種不同的架構模式。通過實作相同的客戶資料顯示功能，清楚地呈現兩種架構的異同。此專案使用 MainWeb 作為統一入口，讓使用者可以在同一個網站中比較這兩種不同的實現方式。
+
+## 目錄
+
+- [架構流程圖](#架構流程圖)
+  - [MVVM 架構流程](#mvvm-架構流程)
+  - [MVC 架構流程](#mvc-架構流程)
+  - [Blazor Server 架構流程](#blazor-server-架構流程)
+  - [Blazor WebAssembly 架構流程](#blazor-webassembly-架構流程)
+- [專案結構](#專案結構)
+- [技術棧](#技術棧)
+- [各架構的主要差異](#各架構的主要差異)
+  - [MVVM (使用 Razor Pages)](#mvvm-使用-razor-pages)
+  - [MVC](#mvc)
+  - [Blazor Server](#blazor-server)
+  - [Blazor WebAssembly](#blazor-webassembly)
+- [架構比較總覽](#架構比較總覽)
+- [共同特點](#共同特點)
+- [解決方案架構](#解決方案架構)
+- [如何運行專案](#如何運行專案)
+  - [使用 Visual Studio/Visual Studio Code](#使用-visual-studiovisual-studio-code)
+  - [多專案啟動配置](#多專案啟動配置)
+  - [使用命令列](#使用命令列)
+  - [特別說明](#特別說明)
+- [建議的使用場景](#建議的使用場景)
+  - [MVVM (Razor Pages)](#mvvm-razor-pages)
+  - [MVC](#mvc-1)
+  - [Blazor Server](#blazor-server-1)
+  - [Blazor WebAssembly](#blazor-webassembly-1)
+- [學習重點](#學習重點)
+- [注意事項](#注意事項)
+- [貢獻指南](#貢獻指南)
+- [授權](#授權)
+- [延伸閱讀](#延伸閱讀)
+- [聯絡方式](#聯絡方式)
 
 ## 架構流程圖
 
@@ -328,7 +365,6 @@ Blazor WebAssembly 專案初次載入時間可能較長，因為需要下載 .NE
 #### Blazor Server 專案
 Blazor Server 需要保持與伺服器的即時連接，如果連接中斷，頁面交互會暫時停止，直到連接恢復。
 
-
 ## 建議的使用場景
 
 ### MVVM (Razor Pages)
@@ -363,38 +399,27 @@ Blazor Server 需要保持與伺服器的即時連接，如果連接中斷，頁
 
 ## 學習重點
 
-1. **檔案結構差異**
-   - MVVM：Pages 資料夾中的 .cshtml 和 .cshtml.cs 配對
-   - MVC：控制器、視圖和模型分開存放
-   - Blazor Server：.razor 組件檔案，可包含 C# 和 HTML
-   - Blazor WebAssembly：類似 Blazor Server，但構建為 WebAssembly
+透過比較不同架構的實現，您可以關注以下關鍵差異：
 
-2. **程式碼組織**
-   - MVVM：視圖模型處理資料轉換和邏輯
-   - MVC：控制器處理請求和回應
-   - Blazor：組件內程式碼或分離式程式碼檔案（.razor.cs）
-
-3. **資料傳遞方式**
-   - MVVM：通過 ViewModel 雙向綁定
-   - MVC：控制器單向傳遞給視圖
-   - Blazor Server：透過 SignalR 即時通訊
-   - Blazor WebAssembly：瀏覽器內記憶體和 API 呼叫
-
-4. **執行環境**
-   - MVVM/MVC：伺服器端渲染網頁
-   - Blazor Server：伺服器執行 UI 邏輯，傳送 DOM 變更
-   - Blazor WebAssembly：瀏覽器執行 .NET 程式碼
-
-5. **狀態管理**
-   - MVVM/MVC：主要依賴 HTTP 請求/回應週期
-   - Blazor Server：伺服器端狀態管理，需注意會話生命週期
-   - Blazor WebAssembly：客戶端狀態管理，需考慮瀏覽器記憶體使用
+1.  **檔案與程式碼組織**：觀察不同模式下檔案如何存放，以及邏輯如何劃分（例如 Controller vs ViewModel vs Component）。
+2.  **資料流與綁定**：理解資料如何在 Model、View 和 Controller/ViewModel/Component 之間傳遞和同步。
+3.  **執行環境與渲染**：區分伺服器端渲染 (SSR) 和客戶端渲染 (CSR) 的不同，以及 Blazor 的特殊模式。
+4.  **狀態管理**：了解不同架構下如何處理使用者狀態和應用程式狀態。
 
 ## 注意事項
 
-- 兩個專案使用相同的資料來源（customers.json）
-- 確保 JSON 檔案路徑正確設定
-- 專案示範基本的讀取功能，實際應用可能需要更複雜的操作
+- 各專案使用相同的資料來源（customers.json），請確保檔案路徑正確設定。
+- 本專案示範基本的讀取功能，實際應用可能需要更複雜的操作。
+
+## 貢獻指南
+
+如果您對本專案有任何建議或想要貢獻程式碼，歡迎遵循以下步驟：
+1. Fork 本專案或建立分支。
+2. 進行修改或新增功能。
+3. 提交 Pull Request，說明您的變更內容。
+4. 等待審核與合併。
+
+如有問題，請開 issue 討論，我們非常樂意聽取您的意見！
 
 ## 授權
 
