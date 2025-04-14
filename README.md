@@ -5,6 +5,9 @@
 ## 架構流程圖
 
 ### MVVM 架構流程
+
+MVVM 使用 Razor Pages 並透過 ViewModel 作為中介者處理資料邏輯與資料綁定。
+
 ```mermaid
 graph TD
     M[Model<br/>客戶資料模型] <--> VM[ViewModel<br/>資料轉換與邏輯]
@@ -12,10 +15,10 @@ graph TD
     U[User] --> V
     V --> U
 
-    style M fill:#f9f,stroke:#333
-    style VM fill:#bbf,stroke:#333
-    style V fill:#bfb,stroke:#333
-    style U fill:#ddd,stroke:#333
+    style M fill:#f9f,stroke:#333,color:#333
+    style VM fill:#bbf,stroke:#333,color:#333
+    style V fill:#bfb,stroke:#333,color:#333
+    style U fill:#ddd,stroke:#333,color:#333
 ```
 
 特點說明：
@@ -25,6 +28,9 @@ graph TD
 - 適合資料驅動的介面設計
 
 ### MVC 架構流程
+
+MVC 採用控制器作為核心，處理用戶請求並協調模型與視圖之間的互動，形成單向資料流。
+
 ```mermaid
 graph LR
     U[User] --> C
@@ -33,10 +39,10 @@ graph LR
     C --> V[View<br/>視圖]
     V --> U
 
-    style M fill:#f9f,stroke:#333
-    style C fill:#bbf,stroke:#333
-    style V fill:#bfb,stroke:#333
-    style U fill:#ddd,stroke:#333
+    style M fill:#f9f,stroke:#333,color:#333
+    style C fill:#bbf,stroke:#333,color:#333
+    style V fill:#bfb,stroke:#333,color:#333
+    style U fill:#ddd,stroke:#333,color:#333
 ```
 
 特點說明：
@@ -46,15 +52,18 @@ graph LR
 - 適合請求驅動的應用程式
 
 ### Blazor Server 架構流程
+
+Blazor Server 模式讓伺服器處理 UI 邏輯並透過 SignalR 連接即時將 DOM 更新傳送給瀏覽器。
+
 ```mermaid
 graph LR
     U[User/Browser] <--SignalR--> S[Server<br/>Blazor Components]
     S --> M[Model<br/>資料模型]
     M --> S
 
-    style M fill:#f9f,stroke:#333
-    style S fill:#bbf,stroke:#333
-    style U fill:#ddd,stroke:#333
+    style M fill:#f9f,stroke:#333,color:#333
+    style S fill:#bbf,stroke:#333,color:#333
+    style U fill:#ddd,stroke:#333,color:#333
 ```
 
 特點說明：
@@ -65,6 +74,9 @@ graph LR
 - 伺服器資源消耗較高，但客戶端需求低
 
 ### Blazor WebAssembly 架構流程
+
+Blazor WebAssembly 讓 .NET 應用程式直接在瀏覽器中執行，提供與原生應用相似的使用體驗與離線功能。
+
 ```mermaid
 graph TD
     B[Browser] --> W[WebAssembly<br/>.NET Runtime]
@@ -75,11 +87,11 @@ graph TD
     W --> B
     C <--> A[API Server<br/>資料請求]
 
-    style M fill:#f9f,stroke:#333
-    style C fill:#bbf,stroke:#333
-    style W fill:#bfb,stroke:#333
-    style B fill:#ddd,stroke:#333
-    style A fill:#fbb,stroke:#333
+    style M fill:#f9f,stroke:#333,color:#333
+    style C fill:#bbf,stroke:#333,color:#333
+    style W fill:#bfb,stroke:#333,color:#333
+    style B fill:#ddd,stroke:#333,color:#333
+    style A fill:#fbb,stroke:#333,color:#333
 ```
 
 特點說明：
@@ -133,11 +145,12 @@ MVVMvsMVC/
 
 ## 技術棧
 
-- .NET 8.0
-- ASP.NET Core
-- Razor Pages (MVVM)
-- ASP.NET Core MVC
-- Bootstrap 5
+- .NET 8.0（最新 LTS，具備效能與支援優勢）
+- ASP.NET Core（Web 應用核心框架）
+- Razor Pages（用於 MVVM）
+- ASP.NET Core MVC（用於傳統 MVC）
+- Blazor Server 和 WebAssembly（用於現代互動式 UI）
+- Bootstrap 5（前端樣式，統一風格）
 
 ## 各架構的主要差異
 
@@ -215,6 +228,15 @@ MVVMvsMVC/
    - 可離線運作
    - 減輕伺服器負擔
    - 適合 Progressive Web Apps (PWA)
+
+## 架構比較總覽
+
+| 架構類型        | 適合場景                 | 資料流向                      | UI 執行位置     | 初始載入 | 對伺服器依賴 |
+|----------------|--------------------------|------------------------------|------------------|-----------|----------------|
+| MVVM (Razor)   | 表單密集、快速開發       | Model ↔ ViewModel ↔ View     | 伺服器端         | 快速      | 高             |
+| MVC            | 複雜邏輯、大型專案       | Controller → Model → View    | 伺服器端         | 快速      | 高             |
+| Blazor Server  | 即時互動、內部系統       | Server UI ↔ Client via SignalR | 伺服器端      | 快速      | 非常高         |
+| Blazor WASM    | 公開網站、離線應用       | WebAssembly UI ↔ API Server  | 瀏覽器 (客戶端)  | 較慢      | 低             |
 
 ## 共同特點
 
@@ -377,3 +399,13 @@ Blazor Server 需要保持與伺服器的即時連接，如果連接中斷，頁
 ## 授權
 
 MIT License
+
+## 延伸閱讀
+
+- [官方 ASP.NET Core 文件](https://learn.microsoft.com/aspnet/core)
+- [Blazor 系列教學](https://learn.microsoft.com/aspnet/core/blazor)
+- [MVVM vs MVC 架構介紹 - 微軟 Learn](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures)
+
+## 聯絡方式
+
+如對本專案有任何建議或問題，歡迎開 issue 或聯絡作者 🙌
