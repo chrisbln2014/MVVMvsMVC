@@ -45,6 +45,50 @@ graph LR
 - 各組件職責明確分離
 - 適合請求驅動的應用程式
 
+### Blazor Server 架構流程
+```mermaid
+graph LR
+    U[User/Browser] <--SignalR--> S[Server<br/>Blazor Components]
+    S --> M[Model<br/>資料模型]
+    M --> S
+
+    style M fill:#f9f,stroke:#333
+    style S fill:#bbf,stroke:#333
+    style U fill:#ddd,stroke:#333
+```
+
+特點說明：
+- UI 邏輯和渲染在伺服器端處理
+- 透過 SignalR 連接與瀏覽器通訊
+- DOM 更新透過 SignalR 訊息傳送
+- 適合低延遲網路和需要保護應用程式邏輯的場景
+- 伺服器資源消耗較高，但客戶端需求低
+
+### Blazor WebAssembly 架構流程
+```mermaid
+graph TD
+    B[Browser] --> W[WebAssembly<br/>.NET Runtime]
+    W --> C[Blazor Components]
+    C --> M[Model<br/>資料模型]
+    M --> C
+    C --> W
+    W --> B
+    C <--> A[API Server<br/>資料請求]
+
+    style M fill:#f9f,stroke:#333
+    style C fill:#bbf,stroke:#333
+    style W fill:#bfb,stroke:#333
+    style B fill:#ddd,stroke:#333
+    style A fill:#fbb,stroke:#333
+```
+
+特點說明：
+- UI 邏輯在瀏覽器中的 WebAssembly 環境執行
+- 完整的前端 SPA (Single Page Application) 體驗
+- 可離線運作，減少伺服器負載
+- 初次載入時間較長，但後續互動快速
+- 適合需要離線功能或減輕伺服器負擔的應用
+
 ## 專案結構
 
 ```
@@ -55,7 +99,7 @@ MVVMvsMVC/
 │
 ├── MainWeb/               # 主網站專案（統一入口）
 │   ├── Pages/             # 入口頁面
-│   │   ├── Index.cshtml   # 首頁（包含兩種模式的連結）
+│   │   ├── Index.cshtml   # 首頁（包含各種模式的連結）
 │   │   └── Shared/        # 共用版面配置
 │   ├── Properties/        # 專案配置
 │   └── wwwroot/           # 靜態檔案
@@ -66,11 +110,25 @@ MVVMvsMVC/
 │   ├── ViewModels/        # 視圖模型
 │   └── Pages/             # Razor Pages
 │
-└── MVC/                   # MVC 專案
+├── MVC/                   # MVC 專案
+│   ├── Properties/        # 專案配置
+│   ├── Models/            # 資料模型
+│   ├── Views/             # 視圖
+│   └── Controllers/       # 控制器
+│
+├── Blazor-Server/         # Blazor Server 專案
+│   ├── Properties/        # 專案配置
+│   ├── Models/            # 資料模型
+│   ├── Services/          # 服務層
+│   ├── Pages/             # Razor 組件
+│   └── Shared/            # 共用組件
+│
+└── Blazor-WebAssembly/    # Blazor WebAssembly 專案
     ├── Properties/        # 專案配置
     ├── Models/            # 資料模型
-    ├── Views/             # 視圖
-    └── Controllers/       # 控制器
+    ├── Pages/             # Razor 組件
+    ├── Shared/            # 共用組件
+    └── Services/          # 服務層
 ```
 
 ## 技術棧
@@ -81,7 +139,7 @@ MVVMvsMVC/
 - ASP.NET Core MVC
 - Bootstrap 5
 
-## 兩種架構的主要差異
+## 各架構的主要差異
 
 ### MVVM (使用 Razor Pages)
 
@@ -120,25 +178,63 @@ MVVMvsMVC/
    - 控制器負責處理用戶請求和回應
    - 較容易進行單元測試
 
+### Blazor Server
+
+1. **檔案組織**
+   - Pages 資料夾存放 Razor 組件 (.razor 檔案)
+   - Services 資料夾負責業務邏輯和數據處理
+   - Shared 資料夾包含共用組件
+
+2. **資料流向**
+   ```
+   Server (Blazor Components + Model) <--> Client (Browser) via SignalR
+   ```
+
+3. **特點**
+   - 伺服器端處理和渲染 UI
+   - 下載量小、啟動快
+   - 支援 .NET 的完整功能
+   - 需要穩定的連接
+   - 伺服器資源消耗較高
+
+### Blazor WebAssembly
+
+1. **檔案組織**
+   - Pages 資料夾存放 Razor 組件 (.razor 檔案)
+   - Services 資料夾處理 API 呼叫和資料交互
+   - Shared 資料夾包含共用組件
+
+2. **資料流向**
+   ```
+   WebAssembly (Blazor Components + Model) <--> API Server
+   ```
+
+3. **特點**
+   - 瀏覽器中執行 .NET 程式碼
+   - 首次載入較慢，後續互動快速
+   - 可離線運作
+   - 減輕伺服器負擔
+   - 適合 Progressive Web Apps (PWA)
+
 ## 共同特點
 
 1. **模型（Model）**
-   - 兩種架構都使用相同的資料模型
+   - 所有架構都可使用相同的資料模型
    - 共用 JSON 檔案作為資料來源
    - 模型類別定義基本的資料結構
 
-2. **視圖（View）**
-   - 都使用 Razor 語法
+2. **視圖呈現**
+   - 都使用 Razor 語法（格式有所不同）
    - 使用 Bootstrap 進行樣式設計
    - 都實現相同的表格顯示功能
 
 ## 解決方案架構
 
-這個解決方案包含三個專案：
+這個解決方案包含五個專案：
 
 1. **MainWeb**
    - 作為整個應用程式的統一入口點
-   - 提供導覽介面，讓使用者可以輕鬆切換between MVVM 和 MVC 實現
+   - 提供導覽介面，讓使用者可以輕鬆切換各種架構實現
    - 使用共用的版面配置和樣式
    - 負責專案的整體配置和路由管理
 
@@ -152,28 +248,63 @@ MVVMvsMVC/
    - 包含控制器、視圖和模型
    - 適合複雜的網路應用
 
+4. **Blazor-Server**
+   - 使用 Blazor Server 模式實現
+   - 伺服器端處理 UI 邏輯，透過 SignalR 傳送 UI 更新
+   - 包含 Razor 組件、服務和模型
+   - 適合需要低延遲即時互動的應用
+
+5. **Blazor-WebAssembly**
+   - 使用 WebAssembly 在瀏覽器中運行 .NET 程式
+   - 前端 SPA 架構，通過 API 呼叫後端服務
+   - 包含 Razor 組件、服務和模型
+   - 適合需要離線功能的 Web 應用
+
 ## 如何運行專案
 
 ### 使用 Visual Studio/Visual Studio Code
 1. 開啟 MVVMvsMVC.sln 解決方案檔
-2. 將 MainWeb 設為啟動專案
+2. 選擇需要運行的專案：
+   - 整合體驗：將 MainWeb 設為啟動專案
+   - 個別體驗：分別選擇 MVVM、MVC、Blazor-Server 或 Blazor-WebAssembly 作為啟動專案
 3. 按下 F5 或點擊「啟動」按鈕
+
+### 多專案啟動配置
+您也可以設定多個專案同時啟動：
+1. 在解決方案上按右鍵，選擇「設定啟動專案」
+2. 選擇「多個啟動專案」
+3. 設定 MainWeb、MVVM、MVC、Blazor-Server 和 Blazor-WebAssembly 為「啟動」
 
 ### 使用命令列
 ```bash
-# 進入主專案資料夾
+# 運行主入口網站
 cd MainWeb
-
-# 運行整個專案（推薦）
 dotnet run
 
-# 或者分別運行子專案
+# 或者運行 MVVM 專案
 cd ../MVVM
 dotnet run
 
+# 或者運行 MVC 專案
 cd ../MVC
 dotnet run
+
+# 或者運行 Blazor Server 專案
+cd ../Blazor-Server
+dotnet run
+
+# 或者運行 Blazor WebAssembly 專案
+cd ../Blazor-WebAssembly
+dotnet run
 ```
+
+### 特別說明
+
+#### Blazor WebAssembly 專案
+Blazor WebAssembly 專案初次載入時間可能較長，因為需要下載 .NET runtime 到瀏覽器中。第一次載入後的操作會更流暢。
+
+#### Blazor Server 專案
+Blazor Server 需要保持與伺服器的即時連接，如果連接中斷，頁面交互會暫時停止，直到連接恢復。
 
 
 ## 建議的使用場景
@@ -183,26 +314,59 @@ dotnet run
 - 表單密集的應用
 - 小型到中型專案
 - 需要快速開發的專案
+- 以頁面為中心的網站應用
 
 ### MVC
 - 複雜的業務邏輯
 - 需要清晰分層的大型專案
 - API 和網頁介面共存的專案
 - 需要精細控制的場景
+- 傳統的多頁面 Web 應用
+
+### Blazor Server
+- 企業內部應用
+- 需要即時通訊的應用
+- 網路連接穩定的環境
+- 伺服器資源充足的情況
+- 需要保護前端程式碼和邏輯的場景
+- 低延遲網路環境下的複雜應用
+
+### Blazor WebAssembly
+- 公共互聯網應用
+- 需要離線功能的應用程式
+- Progressive Web Apps (PWA)
+- 需要減輕伺服器負擔的應用
+- 單頁應用 (SPA)
+- 需要原生應用般體驗的 Web 應用
 
 ## 學習重點
 
 1. **檔案結構差異**
    - MVVM：Pages 資料夾中的 .cshtml 和 .cshtml.cs 配對
    - MVC：控制器、視圖和模型分開存放
+   - Blazor Server：.razor 組件檔案，可包含 C# 和 HTML
+   - Blazor WebAssembly：類似 Blazor Server，但構建為 WebAssembly
 
 2. **程式碼組織**
    - MVVM：視圖模型處理資料轉換和邏輯
    - MVC：控制器處理請求和回應
+   - Blazor：組件內程式碼或分離式程式碼檔案（.razor.cs）
 
 3. **資料傳遞方式**
    - MVVM：通過 ViewModel 雙向綁定
    - MVC：控制器單向傳遞給視圖
+   - Blazor Server：透過 SignalR 即時通訊
+   - Blazor WebAssembly：瀏覽器內記憶體和 API 呼叫
+
+4. **執行環境**
+   - MVVM/MVC：伺服器端渲染網頁
+   - Blazor Server：伺服器執行 UI 邏輯，傳送 DOM 變更
+   - Blazor WebAssembly：瀏覽器執行 .NET 程式碼
+
+5. **狀態管理**
+   - MVVM/MVC：主要依賴 HTTP 請求/回應週期
+   - Blazor Server：伺服器端狀態管理，需注意會話生命週期
+   - Blazor WebAssembly：客戶端狀態管理，需考慮瀏覽器記憶體使用
 
 ## 注意事項
 
